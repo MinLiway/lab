@@ -1,0 +1,12 @@
+events {
+ worker_connections 1024;
+}
+http {
+ server {
+   listen {{ nginx_listem_port }} default_server;
+   server_name default_server;
+   root /usr/share/nginx/html;
+   location / {
+   }
+ }
+}

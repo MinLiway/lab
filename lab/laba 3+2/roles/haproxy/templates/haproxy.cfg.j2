@@ -1,0 +1,37 @@
+global
+    maxconn         10000
+    stats socket    /var/run/haproxy.stat mode 600 level admin
+    log             127.0.0.1:514 local2
+    chroot          /var/empty
+    pidfile         /var/run/haproxy.pid
+    user            haproxy
+    group           haproxy
+    daemon
+
+frontend public
+    bind            *:80 
+    mode            http
+    log             global
+    option          httplog
+    option          dontlognull
+    monitor-uri     /monitoruri
+    maxconn         8000
+    timeout client  10s
+
+    stats uri       /admin/stats
+    use_backend     static if { hdr_beg(host) -i img }
+    use_backend     static if { path_beg /img /css   }
+    default_backend static
+
+
+backend static
+    mode            http
+    balance         roundrobin
+    option prefer-last-server
+    retries         2
+    option redispatch
+    timeout connect 2s
+    timeout server  3s
+    {% for item in groups['webs'] %}
+    server {{ hostvars[item]['inventory_hostname'] }} {{ hostvars[item]['ansible_host'] }}:{{ nginx_listem_port }} check inter 1000 
+    {% endfor %}

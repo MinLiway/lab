@@ -1,0 +1,218 @@
+---
+# tasks file for base
+- name: install postgres rpm package
+  yum:
+    name:  
+      - https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+      - epel-release
+    state: present
+  tags:
+    - install
+
+- name: instal postgresql-14
+  yum:
+    name:  
+      - postgresql14-server
+    state: present
+  tags:
+    - install
+
+- name: Install lvm2 dependency
+  package:
+    name: lvm2
+    state: present
+
+
+
+
+# ..................................................................................................................
+- name: Create a volume group on top of /dev/sdb
+  community.general.lvg:
+    vg: pgdata
+    pvs: /dev/sdb
+  tags:
+    - skip-create-disk
+    - vg
+    
+
+- name: Create a volume group on top of /dev/sdc
+  community.general.lvg:
+    vg: pgwal
+    pvs: /dev/sdc
+  tags:
+    - skip-create-disk
+    - vg
+
+- name: Create a logical volume sdb
+  community.general.lvol:
+    vg: pgdata
+    lv: pgdata
+    # size: 512
+    pvs: /dev/sdb
+    size: 100%VG
+  tags:
+    - skip-create-disk
+    - lv
+
+- name: Create a logical volume sdc
+  community.general.lvol:
+    vg: pgwal
+    lv: pgwal
+    # size: 512
+    pvs: /dev/sdc
+    size: 100%VG
+  tags:
+    - skip-create-disk
+    - lv
+# .................................................................................................................
+- name: mkfs pgdata
+  community.general.filesystem:
+    fstype: xfs
+    dev: /dev/mapper/pgdata-pgdata
+  tags: 
+    - skip-create-disk
+    - formatting
+
+
+- name: mkfs pgwal
+  community.general.filesystem:
+    fstype: xfs
+    dev: /dev/mapper/pgwal-pgwal
+  tags: 
+    - skip-create-disk
+    - formatting
+# .................................................................................................................
+- name: mount the /dev/sdb
+  mount:
+    path: "{{ pathtofiles }}"
+    src: /dev/mapper/pgdata-pgdata
+    fstype: xfs
+    state: mounted
+  tags: 
+    - skip-create-disk
+    - mountdisks
+
+- name: mount the /dev/sdc
+  mount:
+    path: "{{ pathtoback }}"
+    src: /dev/mapper/pgwal-pgwal
+    fstype: xfs
+    state: mounted
+  tags: 
+    - skip-create-disk
+    - mountdisks
+# .................................................................................................................
+- name: Create directory pg_data if does not exist
+  file:
+    path: "{{ pathtofiles }}"
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: '0700'
+  tags:
+    - pg_data
+    
+- name: Create directory pg_wal if does not exist
+  file:
+    path: "{{ pathtoback }}"
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: '0700'
+  tags:
+    - pg_wal
+
+- name: Change file ownership, group and permissions
+  ansible.builtin.file:
+    path: "{{ pathtoobsh }}"
+    owner: postgres
+    group: postgres
+    mode: '0755'
+  tags:
+    - directory
+# .................................................................................................................
+
+- name: Copy rpm 
+  copy:
+    src: "{{ item }}"
+    dest: /tmp/
+  tags: copy_rpm
+  with_items:
+    - patroni-2.0.2-1.rhel7.x86_64.rpm
+    - vip-manager-1.0.2-1.x86_64.rpm
+
+- name: Install rpm
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - /tmp/patroni-2.0.2-1.rhel7.x86_64.rpm
+    - /tmp/vip-manager-1.0.2-1.x86_64.rpm
+  tags: 
+    - install_rpm
+
+# .................................................................................................................
+- name: Create directory data1 if does not exist
+  file:
+    path: /var/log/patroni
+    state: directory
+    owner: postgres
+    group: postgres
+  tags:
+    - directory
+
+- name: Create directory data1 if does not exist
+  file:
+    path: /var/log/postgres
+    state: directory
+    owner: postgres
+    group: postgres
+  tags:
+    - directory
+
+- name: environment
+  template:
+    src: env
+    dest: /etc/environment
+  # when: pg1
+
+- name: Start patroni-watchdog
+  ansible.builtin.systemd:
+    name: patroni-watchdog.service
+    state: started
+    enabled: yes
+  
+- name: restart patroni
+  ansible.builtin.systemd:
+    name: patroni
+    state: restarted
+    enabled: yes
+  tags: 
+    - patron
+# .................................................................................................................
+- name: patrony aboba
+  template:
+    src: postgresql.yml
+    dest: /opt/app/patroni/etc/postgresql.yml
+  notify: restart patron
+  tags:
+    - patron_conf
+
+- name: Read gossip encryption key from previously boostrapped server
+  shell: 'cat /etc/consul.d/consul.hcl | grep "^encrypt = " | sed -E ''s/encrypt = "(.+)",?/\1/'' | sed ''s/^ *//;s/ *$//'''
+  register: consul_key_read
+  changed_when: false
+
+- name: Set fact gossip encryption key from existing configuration
+  set_fact:
+    consul_raw_key: "{{ consul_key_read.stdout }}"
+  when: consul_key_read.stdout != ''
+
+- name: i cant find this shit
+  template:
+    src: vip.yml
+    dest: /etc/default/vip-manager.yml
+  notify: restart vip
+  tags:
+    - config_vip
+

@@ -1,0 +1,3 @@
+---
+keepalived_ip_nonlocal_bind: 1
+nginx_listem_port: 8080

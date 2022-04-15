@@ -1,0 +1,7 @@
+[webs]
+web1 ansible_host=192.168.11.111
+web2 ansible_host=192.168.11.112
+
+[haproxys]
+haproxy1 ansible_host=192.168.11.113 var_priority=1
+haproxy2 ansible_host=192.168.11.114 var_priority=2

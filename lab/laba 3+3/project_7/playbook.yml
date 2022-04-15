@@ -1,0 +1,8 @@
+- name: playbook for postgresql14
+  hosts: 
+    - server
+  roles:
+    - roles/clients
+  tags: pb-host-server
+ 
+

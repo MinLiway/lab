@@ -1,0 +1,5 @@
+---
+# vars file for base
+pathtofiles: /pgsql/pg_data/14/
+pathtoback: /pgsql/pg_wal/14/
+pathtoobsh: /pgsql/

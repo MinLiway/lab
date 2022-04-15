@@ -1,0 +1,11 @@
+
+[consul]
+192.168.11.30 ansible_user=root ansible_become=yes consul_role=server consul_iface="enp0s8"
+192.168.11.31 ansible_user=root ansible_become=yes consul_role=server consul_iface="enp0s8"
+192.168.11.32 ansible_user=root ansible_become=yes consul_role=server consul_iface="enp0s8"
+192.168.11.20 ansible_user=root ansible_become=yes consul_role=client consul_iface="enp0s8"
+192.168.11.21 ansible_user=root ansible_become=yes consul_role=client consul_iface="enp0s8"
+
+[pudg]
+pg1 ansible_host=192.168.11.20 ansible_user=root ansible_become=yes consul_role=client consul_iface="enp0s8"
+pg2 ansible_host=192.168.11.21 ansible_user=root ansible_become=yes consul_role=client consul_iface="enp0s8"
