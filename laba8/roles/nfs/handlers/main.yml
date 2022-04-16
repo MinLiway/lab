@@ -1,6 +1,0 @@
-- name: start nfs
-  ansible.builtin.systemd:
-    name: nfs
-    state: started
-    enabled: yes
-  tags: start-nfs
