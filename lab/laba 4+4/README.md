@@ -25,7 +25,7 @@ ansible-playbook consul.play
 ansible-playbook playbook.yml 
 ````
 ## Скорее всего на одном из этапов выдаст кучу ошибок, 
-нужно включить впн, перевести дату на 15.04.22
+нужно включить впн, перевести дату на 15.04.22,
 найти в файлике main по пути /home/min/project_8/roles/after/tasks
  адреса репозиториев и заменить https на http
 
