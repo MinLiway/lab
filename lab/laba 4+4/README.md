@@ -24,13 +24,14 @@ ansible-playbook consul.play
 ````
 ansible-playbook playbook.yml 
 ````
-## Скорее всего на одном из этапов выдаст кучу ошибок, нужно включить впн, перевести дату на 15.04.22
-## найти в файлике main по пути /home/min/project_8/roles/after/tasks
-## адреса репозиториев и заменить https на http
+## Скорее всего на одном из этапов выдаст кучу ошибок, 
+нужно включить впн, перевести дату на 15.04.22
+найти в файлике main по пути /home/min/project_8/roles/after/tasks
+ адреса репозиториев и заменить https на http
 
-## зайти на машины по ssh 
-## на nfs - запустить systemctl start nfs
-## на pg1 and pg2 выполнить команды отсюда https://winitpro.ru/index.php/2019/09/26/ustanovka-postgresql-db-centos/ 
+зайти на машины по ssh 
+на nfs - запустить systemctl start nfs
+на pg1 and pg2 выполнить команды отсюда https://winitpro.ru/index.php/2019/09/26/ustanovka-postgresql-db-centos/ 
 
 
 ## Если ничего не получилось попробуйте отправить в огонь все что было до этого
