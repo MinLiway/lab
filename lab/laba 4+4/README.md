@@ -33,6 +33,7 @@ ansible-playbook playbook.yml
 на nfs - запустить systemctl start nfs
 на pg1 and pg2 выполнить команды отсюда https://winitpro.ru/index.php/2019/09/26/ustanovka-postgresql-db-centos/ 
 
+Выполнить команды из файла main по пути /home/min/project_8/roles/prepare-pgsql/tasks
 
 ## Если ничего не получилось попробуйте отправить в огонь все что было до этого
 ## (Сжигаем мосты короч)
